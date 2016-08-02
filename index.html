@@ -8,14 +8,19 @@
     <link href="assets/css/bootstrap.css" rel="stylesheet" />       <!-- 讓網頁漂亮一點的CSS Style -->
     <link href="assets/css/main.css" rel="stylesheet" />            <!-- 讓表單與角落離開一點 -->
     <link href="assets/css/font-awesome.min.css" rel="stylesheet" />
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <script src="assets/js/angular.min.js"></script>                <!-- 操控網頁元件的函式庫 -->
     <script src="assets/js/highcharts.js"></script>                 <!-- 產生圖表(Highchart)的函式庫 -->
     <script src="assets/js/highcharts-more.js"></script>            <!-- Highchart的延伸工具函式庫 -->
     <script src="assets/js/solid-gauge.js"></script>                <!-- Highchart特定圖表函式庫 -->
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://rawgit.com/pablojim/highcharts-ng/v0.0.1/src/directives/highcharts-ng.js"></script>
     <script src="assets/js/highcharts-ng.min.js"></script>          <!-- Angular.js對Highchart的函式庫 -->
     <script src="assets/js/mqttws31.min.js"></script>               <!-- 連結MQTT Broker的函式庫 -->
     <script src="assets/js/Math.uuid.js"></script>                  <!-- 一個產生Unique ID的函式庫 -->
     <script src="assets/js/moment-with-locales.min.js"></script>    <!-- 一個處理時間的函式庫 -->
+    <script src="assets/js/angular-highcharts-directive.js"></script>
+
 </head>
 <body ng-controller="rtwAppCtrl">
 	<h1>ChatApp</h1>
@@ -92,10 +97,16 @@
 	    <br />
 	    <h4>即時圖表</h4>
 	    	<div style="width: 400px; height: 400px; margin: 0">
-	        <highchart config="chartConfig"></highchart>
-	    </div> 
+	        	<highchart config="chartConfig"></highchart>
+	    	</div> 
     </div>
     <div class='col-md-4'>
+    	<!--div id="container" style="min-width: 310px; height: 400px; margin: 0 auto">
+    		<highchart id="online" config="onlineChartConfig"></highchart>
+    		
+    	</div-->
+    	<chart value='onlineChart'></chart>
     </div>
+
 </body>
 </html>

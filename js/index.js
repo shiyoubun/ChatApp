@@ -1,5 +1,5 @@
 // 定義Angular Module - ** 在這裡要引入"highcharts-ng"的模組 **
-var rtwApp = angular.module('rtwApp', ["highcharts-ng"]);
+var rtwApp = angular.module('rtwApp', ["highcharts-ng","chartsExample.directives"]);
 
 // 定義Angular Controller
 rtwApp.controller('rtwAppCtrl', function ($scope) {
@@ -169,14 +169,12 @@ rtwApp.controller('rtwAppCtrl', function ($scope) {
         mqtt_message.destinationName = $scope.vm.topic + "/" + $scope.vm.chart_data_type;
         mqtt_message.retained = true; // 設成retained
         mqtt_client.send(mqtt_message);
-        $scope.vm.is_chartmode = false;
     };
     $scope.action.send_gpmessage = function () {
         var mqtt_message = new Paho.MQTT.Message($scope.vm.gpmessage); //轉換數字成文字
         mqtt_message.destinationName = $scope.vm.topic + "/" + $scope.vm.user_id;
         mqtt_message.retained = true; // 設成retained
         mqtt_client.send(mqtt_message);
-        $scope.vm.is_gpmode = false;
     };
     // **動作: 訂閱訊息主題
     $scope.action.subscribe_topic = function () {
@@ -248,6 +246,64 @@ rtwApp.controller('rtwAppCtrl', function ($scope) {
                 y: chart_data
             }]);
         }
+    };
+    $scope.onlineChartConfig = {          
+        options: {
+            chart: {
+                type: 'spline',
+                animation: Highcharts.svg,
+                events: {
+                    load: function() {
+                        var series = this.series[0];
+                        var str = JSON.stringify(series);
+                        console.log(series);
+                        setInterval(function(){
+                            var x = (new Date()).getTime(), y = $scope.vm.online_users.length;
+                            series.addPoint([x, y], true, true);
+                        }, 1000);
+                    }
+                }
+            }
+        },
+        title: {
+            text: 'Live online users'
+        },
+        xAxis: {
+            type: 'datetime',
+            tickPixelInterval: 150
+        },
+        yAxis: {
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.name + '</b><br/>' +
+                Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                Highcharts.numberFormat(this.y, 2);
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        exporting: {
+            enabled: false
+        },
+        series: [{
+            name: 'Online users',
+            data: (function(){
+                var data = [],
+                    time = (new Date()).getTime();
+                data.push({
+                    x: time,
+                    y: $scope.vm.online_users.length
+                });
+                return data;
+            }())
+        }]
     };
 
     // 設定要繋結到Highchart的chartConfig物件
@@ -349,5 +405,63 @@ rtwApp.controller('rtwAppCtrl', function ($scope) {
                 y: $scope.vm.chart_data_standard
             }]
         }]
-    };            
+    };
+    $scope.onlineChart = {
+        chart: {
+            type: 'spline',
+            animation: Highcharts.svg, // don't animate in old IE
+            marginRight: 10,
+            events: {
+                load: function() {
+                    // set up the updating of the chart each second
+                    var series = this.series[0];
+                    setInterval(function() {
+                        var x = (new Date()).getTime(), // current time
+                            y = $scope.vm.online_users.length;
+                        series.addPoint([x, y], true, true);
+                    }, 1000);
+                }
+            }
+        },
+        title: {
+            text: 'Live online users'
+        },
+        xAxis: {
+            type: 'datetime',
+            //tickPixelInterval: 150
+        },
+        yAxis: {
+            title: {
+                text: 'Value'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            formatter: function() {
+                    return '<b>'+ this.series.name +'</b><br/>'+
+                    Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+
+                    Highcharts.numberFormat(this.y, 2);
+            }
+        },
+        series: [{
+            name: 'Online users',
+            data: (function() {
+                // generate an array of random data
+                var data = [],
+                    time = (new Date()).getTime(),
+                    i;
+                    for (i = -19; i <= 0; i++) {
+                        data.push({
+                            x: time + i * 1000,
+                            y: 0
+                        });
+                    }
+                return data;
+            })()
+        }]
+    }   
 });
