@@ -1,1 +1,101 @@
-Hello World!
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="rtwApp">
+<head>
+    <meta charset="utf-8" />
+    <title>ChatApp</title>
+    <link rel="icon" type="image/png" href="assets/imgs/ok.ico">
+    <link href="assets/css/bootstrap.css" rel="stylesheet" />       <!-- 讓網頁漂亮一點的CSS Style -->
+    <link href="assets/css/main.css" rel="stylesheet" />            <!-- 讓表單與角落離開一點 -->
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet" />
+    <script src="assets/js/angular.min.js"></script>                <!-- 操控網頁元件的函式庫 -->
+    <script src="assets/js/highcharts.js"></script>                 <!-- 產生圖表(Highchart)的函式庫 -->
+    <script src="assets/js/highcharts-more.js"></script>            <!-- Highchart的延伸工具函式庫 -->
+    <script src="assets/js/solid-gauge.js"></script>                <!-- Highchart特定圖表函式庫 -->
+    <script src="assets/js/highcharts-ng.min.js"></script>          <!-- Angular.js對Highchart的函式庫 -->
+    <script src="assets/js/mqttws31.min.js"></script>               <!-- 連結MQTT Broker的函式庫 -->
+    <script src="assets/js/Math.uuid.js"></script>                  <!-- 一個產生Unique ID的函式庫 -->
+    <script src="assets/js/moment-with-locales.min.js"></script>    <!-- 一個處理時間的函式庫 -->
+</head>
+<body ng-controller="rtwAppCtrl">
+	<h1>ChatApp</h1>
+	<div class='col-md-4'>
+	    <h4>己上線的使用者</h4>
+	    <span ng-repeat="online_user in vm.online_users" class="text-danger"><a href="" ng-click="action.build_private_chart_topic(online_user)"><i class="fa fa-bar-chart-o"></i> {{online_user}}</a> </span>
+   		<h4>己訂閱群組</h4>
+	    <span ng-repeat="gpchannel in vm.gpchannels" class="text-danger"><a href="" ng-click="action.build_private_channel_topic(gpchannel)"><i class="fa fa-bar-chart-o"></i> {{gpchannel}}</a> </span>
+	    <h4>己訂閱的主題</h4>
+	    <table class="table-bordered">
+	        <tr>
+	            <th> Topic </th>
+	            <th> Action </th>
+	        </tr>
+	        <tr ng-repeat="subscribed_topic in vm.subscribed_topics">
+	            <td>{{subscribed_topic}}</td>
+	            <td><input type="button" value="Unsubscribe" ng-click="action.unsubscribe_topic(subscribed_topic)" /></td>
+	        </tr>
+	    </table>
+
+	    <h4>收到的訊息</h4>
+	    <table class="table-bordered">
+	        <tr>
+	            <th> Topic </th>
+	            <th> Retained </th>
+	            <th> Qos</th>
+	            <th> Message </th>
+	            <th> Timestamp </th>
+	        </tr>
+	        <tr ng-repeat="inbound_message in vm.inbound_messages">
+	            <td>{{inbound_message.topic}} </td>
+	            <td>{{inbound_message.retained}} </td>
+	            <td>{{inbound_message.qos}}</td>
+	            <td>{{inbound_message.payload}} </td>
+	            <td>{{inbound_message.eventdt}} </td>
+	        </tr>
+	    </table>
+	    <script type="text/javascript" src="js/index.js"></script>
+	    <script type="text/javascript" src="config/mqtt.js"></script>
+	</div>
+	<div class='col-md-4'>
+	    <!-- 網頁表單UI -->
+	    <form>
+	        Mqtt Host/Port: <br />
+	        <input type="text" ng-model="vm.mqtt_host" /> <input type="text" ng-model="vm.mqtt_port" /> <br /><br />
+	        User Name: <br />
+	        <input type="text" ng-model="vm.user_id" /><br /><br />
+	        Join the group: <br />
+	        <input type="text" ng-model="vm.gp" ng-show="vm.is_connected" size="30" />
+	        <input type="button" value="Register" ng-click="action.register_group()" ng-show="vm.is_connected" /> <br /><br />
+	        Topic: <br />
+	        <input type="text" ng-model="vm.topic" ng-show="vm.is_connected" size="30" />
+	        <br />
+	        <select ng-model="vm.chart_data_type" ng-show="vm.is_chartmode">
+	        Chart Data Type:<br />
+	            <option value="move"> 移動</option>
+	            <option value="exercise"> 運動</option>
+	            <option value="standard"> 標準</option>
+	        </select><br />
+
+	        Data: <br />
+	        <input type="number" ng-model="vm.message" ng-show="vm.is_chartmode" />
+	        <input type="button" value="Send" ng-click="action.send_message()" ng-show="vm.is_chartmode && vm.topic.length>0" />
+	        <input type="text" ng-model="vm.gpmessage" ng-show="vm.is_gpmode" />
+	        <input type="button" value="Send" ng-click="action.send_gpmessage()" ng-show="vm.is_gpmode && vm.topic.length>0" /> <br /><br />
+	        Subscribe Topic: <br />
+	        <input type="text" ng-model="vm.subscribe_topic" ng-show="vm.is_connected" />
+	        <input type="button" value="Subscribe" ng-click="action.subscribe_topic()" ng-show="vm.is_connected" />
+	        <input type="button" value="Unsubscribe" ng-click="action.unsubscribe_topic()" ng-show="vm.is_connected && vm.is_subscribed" /> <br /><br />
+
+	        <input type="button" value="Connect" ng-click="action.connect_mqtt()" ng-show="!vm.is_connected" />
+	        <input type="button" value="Disconnect" ng-click="action.disconnect_mqtt()" ng-show="vm.is_connected" />
+	    </form>
+	    <br />
+	    <h4>即時圖表</h4>
+	    	<div style="width: 400px; height: 400px; margin: 0">
+	        <highchart config="chartConfig"></highchart>
+	    </div> 
+    </div>
+    <div class='col-md-4'>
+    </div>
+</body>
+</html>
